@@ -1,14 +1,18 @@
 #pragma once
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define ENTRY_ERROR_MEMALLOC 0
-#define ENTRY_SUCCES 1
+// Error constants.
+#define ENTRY_ERROR_MEMALLOC      (unsigned char)0
+#define ENTRY_ERROR_INVALID_PARAM (unsigned char)2
+#define ENTRY_ERROR_NULL_PTR      (unsigned char)3
+#define ENTRY_SUCCES              (unsigned char)1
 
 /*===========================================*/
-typedef char* Ent_String;
 typedef unsigned char Ent_Return_Code;
+/*===========================================*/
+typedef char* Ent_String;
 typedef const char* Ent_CString;
 /*===========================================*/
 typedef void* Ent_Any;
@@ -30,9 +34,6 @@ typedef struct Entries {
 	Ent_UInt size;
 } Entries;
 
-/*===========================================*/
-typedef void (*Ent_Callback)(Entrie);
-/*===========================================*/
-
 Ent_Return_Code entrie_push(Entries* entries, Ent_CString key, Ent_Any value, Ent_UShort value_size);
-void entrie_foreach(Entries entries, Ent_Callback callback);
+Ent_Return_Code entrie_pop(Entries entries);
+Ent_Return_Code entrie_delete(Entries entries);

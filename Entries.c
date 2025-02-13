@@ -1,17 +1,19 @@
 #include "./Entries.h"
 
 Ent_Return_Code entrie_push(Entries* entries, Ent_CString key, Ent_Any value, Ent_UShort value_size) {
-	if(entries->items == NULL)
+	if(entries == NULL || key == NULL || (value != NULL && value_size == 0))
+		return ENTRY_ERROR_INVALID_PARAM;
+
+	if(entries->items == NULL) {
 		entries->items = (Entrie**)malloc(sizeof(Entrie*));
-	else
+	}	else {
 		entries->items = (Entrie**)realloc(entries->items, (entries->size + 1) * sizeof(Entrie*));
-	
-	if(entries->items == NULL)
-		return ENTRY_ERROR_MEMALLOC;
+		if(entries->items == NULL)
+			return ENTRY_ERROR_MEMALLOC;
+	}
 
 	Ent_ULLong key_length = strlen(key) + 1;
 	Ent_ULLong size_of_entrie = sizeof(Entrie);
-	
 	Entrie* item = (Entrie*)malloc(size_of_entrie + key_length + value_size);
 	if(entries->items == NULL)
 		return ENTRY_ERROR_MEMALLOC;
@@ -22,7 +24,7 @@ Ent_Return_Code entrie_push(Entries* entries, Ent_CString key, Ent_Any value, En
 	item->key = key_position;
 	item->value = value_position;
 	
-	memmove(item->key, key, key_length);
+	mempcpy(item->key, key, key_length);
 	mempcpy(item->value, value, value_size);
 
 	entries->items[entries->size++] = item;
@@ -30,7 +32,27 @@ Ent_Return_Code entrie_push(Entries* entries, Ent_CString key, Ent_Any value, En
 	return ENTRY_SUCCES;
 }
 
-void entrie_foreach(Entries entries, Ent_Callback callback) {
+Ent_Return_Code entrie_pop(Entries entries) {
+	if(entries.items == NULL)
+		return ENTRY_ERROR_NULL_PTR;
+
+	free(entries.items[entries.size - 1]);
+	entries.items[entries.size - 1] = NULL;
+	entries.size--;
+
+	if(entries.size == 0)
+		free(entries.items);
+
+	return ENTRY_SUCCES;
+}
+
+Ent_Return_Code entrie_delete(Entries entries) {
+	if(entries.items == NULL)
+		return ENTRY_ERROR_NULL_PTR;
+
 	for(Ent_ULLong index = 0; index < entries.size; index++)
-		callback(*entries.items[index]);
+		free(entries.items[index]);
+	free(entries.items);
+
+	return ENTRY_SUCCES;
 }
